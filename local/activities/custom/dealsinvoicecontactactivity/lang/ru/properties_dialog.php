@@ -1,0 +1,2 @@
+<?$MESS ['DEALS_INVOICE_CONTACT_ACTIVITY_CONTACT_ID'] = "ID контакта";
+?>

@@ -1,0 +1,3 @@
+<? 
+$MESS ['DEALS_COMPANY_ACTIVITY_EMPTY_COMPANY_ID'] = "Не заполнен ID компании";
+$MESS ['DEALS_COMPANY_ACTIVITY_COMPANY'] = "ID компании";

@@ -1,0 +1,56 @@
+#block {
+    width:  100px;
+    height: 100px;
+}
+
+#hideBlock {
+    width:  500px;
+    height: 200px;
+}
+
+.my_class1 {
+    background: forestgreen;
+    border: darkgreen 1px solid;
+}
+
+.my_class2 {
+    background: deepskyblue;
+    border: blue 1px solid;
+}
+
+.css_popup {
+    cursor: pointer;
+}
+
+.items {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    height: 100px;
+    display: none;
+}
+
+.item {
+    position:relative;
+    width: 100px;
+    height: 100%;
+    padding-top: 56.25%;
+}
+
+.item img {
+    position: absolute;
+    overflow: hidden;
+    object-fit: cover;
+    left: 0;
+    top: 0;
+    width: 100px;
+    height: 100px;
+    max-width: 100px;
+    cursor: pointer;
+}
+
+.click {
+    cursor: pointer;
+    padding: 20px 0;
+}
