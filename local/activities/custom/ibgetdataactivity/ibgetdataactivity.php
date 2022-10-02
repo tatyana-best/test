@@ -25,10 +25,7 @@ class CBPIbGetDataActivity extends CBPActivity
 		if (!CModule::IncludeModule("iblock"))
             return false;
 
-<<<<<<< HEAD
-=======
 		//выбрали четыре поля и все свойства
->>>>>>> e9e39558a885f3fb3e228efa371bd0d03ac49d0a
 		$arSelect = Array("ID", "IBLOCK_ID", "NAME", "DATE_ACTIVE_FROM","PROPERTY_*");		
 
 		$arFilter = array_merge(array($iblockId), $fields);
@@ -53,11 +50,8 @@ class CBPIbGetDataActivity extends CBPActivity
 		
 		$arFieldsProps = self::QueryGetArrayFieldsProperties(["IBLOCK_ID"=>$this->IblockId], $this->IblockFields);		
 
-<<<<<<< HEAD
-=======
 		//формируем итоговый массив результатов
 		//здесь должны в итоговый массив с дополнительными результатми записаться нужные значения
->>>>>>> e9e39558a885f3fb3e228efa371bd0d03ac49d0a
 		$result_fields = [];
 
 		foreach($arFieldsProps['fields'] as $key => $value){
@@ -90,15 +84,9 @@ class CBPIbGetDataActivity extends CBPActivity
 			$result_fields['MESSAGE'] = GetMessage('IB_ACTIVITY_GET_DATA_IS_ELEMENT_MESSAGE_NO');			
 		}
 
-<<<<<<< HEAD
-
-		$this->IblockFieldsResult = $result_fields;
-
-=======
 		//массив с дополнительными результатами
 		$this->IblockFieldsResult = $result_fields;
 		//вот это обязательно
->>>>>>> e9e39558a885f3fb3e228efa371bd0d03ac49d0a
 		$this->SetProperties($result_fields);
 
 		return CBPActivityExecutionStatus::Closed;
@@ -177,11 +165,8 @@ class CBPIbGetDataActivity extends CBPActivity
 
 		$result_fields = [];
 
-<<<<<<< HEAD
-=======
 		//собираем массив названий полей дополнительных результатов и их типов
 
->>>>>>> e9e39558a885f3fb3e228efa371bd0d03ac49d0a
 		foreach($arFieldsProps['fields'] as $key => $value){
 			if(is_array($value['VALUE']))
 			{
@@ -193,21 +178,6 @@ class CBPIbGetDataActivity extends CBPActivity
 				$result_fields[$key]['Name'] = $key;
 				$result_fields[$key]['Type'] = 'string';
 			}
-<<<<<<< HEAD
-=======
-		}
-		
-		foreach($arFieldsProps['properties'] as $key => $value){
-			if(is_array($value['VALUE'])){
-				$result_fields['PROPERTY_'.$key]['Name'] = $key;
-				$result_fields['PROPERTY_'.$key]['Type'] = 'string';
-			}
-			else
-			{
-				$result_fields['PROPERTY_'.$key]['Name'] = $key;
-				$result_fields['PROPERTY_'.$key]['Type'] = 'string';
-			}
->>>>>>> e9e39558a885f3fb3e228efa371bd0d03ac49d0a
 		}
 		
 		foreach($arFieldsProps['properties'] as $key => $value){
@@ -221,21 +191,6 @@ class CBPIbGetDataActivity extends CBPActivity
 				$result_fields['PROPERTY_'.$key]['Type'] = 'string';
 			}
 		}
-
-		if($result_fields)
-		{
-			$result_fields['MESSAGE']['Name'] = GetMessage('IB_ACTIVITY_GET_DATA_IS_ELEMENT_MESSAGE_YES');
-			$result_fields['MESSAGE']['Type'] = 'string';
-		}
-		else
-		{
-			$result_fields['MESSAGE']['Name'] = GetMessage('IB_ACTIVITY_GET_DATA_IS_ELEMENT_MESSAGE_NO');
-			$result_fields['MESSAGE']['Type'] = 'string';
-		}
-
-		$properties['IblockFieldsResult'] = $result_fields;
-			
-		
 
 		if($result_fields)
 		{
