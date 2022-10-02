@@ -46,7 +46,7 @@
 						'application_token' => htmlspecialchars($_REQUEST['APP_SID']),
 						'refresh_token' => htmlspecialchars($_REQUEST['REFRESH_ID']),
 						'domain' => htmlspecialchars($_REQUEST['DOMAIN']),
-						'client_endpoint' => 'https://' . htmlspecialchars($_REQUEST['DOMAIN']) . '/rest/',
+						'client_endpoint' => 'https://' . htmlspecialchars($_REQUEST['DOMAIN']) . '/rest1/',
 					],
 					true
 				);

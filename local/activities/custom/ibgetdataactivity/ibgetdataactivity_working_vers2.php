@@ -25,7 +25,6 @@ class CBPIbGetDataActivity extends CBPActivity
 		if (!CModule::IncludeModule("iblock"))
             return false;
 
-		//выбрали четыре поля и все свойства
 		$arSelect = Array("ID", "IBLOCK_ID", "NAME", "DATE_ACTIVE_FROM","PROPERTY_*");		
 
 		$arFilter = array_merge(array($iblockId), $fields);
@@ -50,8 +49,6 @@ class CBPIbGetDataActivity extends CBPActivity
 		
 		$arFieldsProps = self::QueryGetArrayFieldsProperties(["IBLOCK_ID"=>$this->IblockId], $this->IblockFields);		
 
-		//формируем итоговый массив результатов
-		//здесь должны в итоговый массив с дополнительными результатми записаться нужные значения
 		$result_fields = [];
 
 		foreach($arFieldsProps['fields'] as $key => $value){
@@ -84,9 +81,9 @@ class CBPIbGetDataActivity extends CBPActivity
 			$result_fields['MESSAGE'] = GetMessage('IB_ACTIVITY_GET_DATA_IS_ELEMENT_MESSAGE_NO');			
 		}
 
-		//массив с дополнительными результатами
+
 		$this->IblockFieldsResult = $result_fields;
-		//вот это обязательно
+
 		$this->SetProperties($result_fields);
 
 		return CBPActivityExecutionStatus::Closed;
@@ -97,7 +94,7 @@ class CBPIbGetDataActivity extends CBPActivity
 		$documentType, $activityName, $workflowTemplate, $workflowParameters,
 		$workflowVariables, $currentValues = null, $formName = '')
 	{
-		//все, что будет в диалоге. Если ранее присваивались значения в исходные данные - поля диалога, то они должны взяться из массива $currentValues
+		
 		if (!is_array($workflowParameters))
 			$workflowParameters = [];
 		if (!is_array($workflowVariables))
@@ -165,8 +162,6 @@ class CBPIbGetDataActivity extends CBPActivity
 
 		$result_fields = [];
 
-		//собираем массив названий полей дополнительных результатов и их типов
-
 		foreach($arFieldsProps['fields'] as $key => $value){
 			if(is_array($value['VALUE']))
 			{
@@ -203,7 +198,6 @@ class CBPIbGetDataActivity extends CBPActivity
 			$result_fields['MESSAGE']['Type'] = 'string';
 		}
 
-		//это тоже обязательно
 		$properties['IblockFieldsResult'] = $result_fields;
 			
 		
@@ -220,8 +214,6 @@ class CBPIbGetDataActivity extends CBPActivity
 
 	protected static function renderEntityFields($iblock, $currentValues = [])
 	{
-		
-		//html формы диалога
 		$html = '';	
 
 		$entityFields = self::getIblockFields($iblock);	
@@ -239,8 +231,10 @@ class CBPIbGetDataActivity extends CBPActivity
 
 	protected static function getIblockFields($iblock)
 	{		
+		$entityFields = [];
 		$preparedFields = [];
 
+		$preparedFields = [];
 		if (!CModule::IncludeModule('iblock'))
 			return [];			
 		
