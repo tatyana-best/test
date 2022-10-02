@@ -10,48 +10,38 @@ class CBPIbGetDataActivity extends CBPActivity
 		parent::__construct($name);
 		$this->arProperties = [
 			'Title'            => '',
+			'IblockElementId' => 0,
 			'IblockId'         => null,
 			'IblockOrder' => null,
 			'IblockFields'     => array(),			
 			'IblockFieldsResult' => array()
 		];
 
-	}
-
-
-	//формируем запрос на выборку элементов инфоблока
-	public static function QueryGetArrayFieldsProperties($iblockId, $fields = [])
-	{
-		if (!CModule::IncludeModule("iblock"))
-            return false;
-
-		$arSelect = Array("ID", "IBLOCK_ID", "NAME", "DATE_ACTIVE_FROM","PROPERTY_*");		
-
-		$arFilter = array_merge(array($iblockId), $fields);
-		
-		$res = CIBlockElement::GetList(Array(), $arFilter, false, Array(), $arSelect);
-		
-		if($ob = $res->GetNextElement(true, false)){ 
-		 	$arFields = $ob->GetFields(); 
-		 	$arProps = $ob->GetProperties(); 		 	
-		}
-
-		$arrayFieldsProperties['fields'] = $arFields;
-		$arrayFieldsProperties['properties'] = $arProps;
-
-		return $arrayFieldsProperties;
 
 	}
 	
 
 	public function execute()
 	{
+		if (!CModule::IncludeModule("iblock"))
+            return CBPActivityExecutionStatus::Closed;
+
+		$arSelect = Array("ID", "IBLOCK_ID", "NAME", "DATE_ACTIVE_FROM","PROPERTY_*");
+
+		define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/log.txt");
 		
-		$arFieldsProps = self::QueryGetArrayFieldsProperties(["IBLOCK_ID"=>$this->IblockId], $this->IblockFields);		
 
+		$arFilter = array_merge(array("IBLOCK_ID"=>$this->IblockId), $this->IblockFields);
+		
+		$res = CIBlockElement::GetList(Array(), $arFilter, false, Array(), $arSelect);
 		$result_fields = [];
+		if($ob = $res->GetNextElement(true, false)){ 
+		 	$arFields = $ob->GetFields(); 
+		 	$arProps = $ob->GetProperties(); 
+		 	$IblockElementId = $arFields['ID'];	
+		}
 
-		foreach($arFieldsProps['fields'] as $key => $value){
+		foreach($arFields as $key => $value){
 			if(is_array($value['VALUE']))
 			{
 				$result_fields[$key] = implode('; ', $value['VALUE']);				
@@ -62,7 +52,7 @@ class CBPIbGetDataActivity extends CBPActivity
 			}
 		}
 		
-		foreach($arFieldsProps['properties'] as $key => $value){
+		foreach($arProps as $key => $value){
 			if(is_array($value['VALUE'])){
 				$result_fields['PROPERTY_'.$key] = implode('; ', $value['VALUE']['VALUE']);				
 			}
@@ -81,6 +71,10 @@ class CBPIbGetDataActivity extends CBPActivity
 			$result_fields['MESSAGE'] = GetMessage('IB_ACTIVITY_GET_DATA_IS_ELEMENT_MESSAGE_NO');			
 		}
 
+
+		AddMessage2Log("ID элемента: " . $IblockElementId. " Все данные о найденном элементе: ". implode(', ',$result_fields), "iblock");
+
+		//$this->IblockElementId = $IblockElementId;
 
 		$this->IblockFieldsResult = $result_fields;
 
@@ -115,15 +109,18 @@ class CBPIbGetDataActivity extends CBPActivity
 			{
 				$currentValues['IblockId'] = $currentActivity['Properties']['IblockId'];
 				$currentValues['IblockOrder'] = $currentActivity['Properties']['IblockOrder'];	
-				$currentValues['IblockFields'] = $currentActivity['Properties']['IblockFields'];	
+				$currentValues['IblockFields'] = $currentActivity['Properties']['IblockFields'];			
 		      	
 		      	$renderEntityFields = self::renderEntityFields($currentActivity['Properties']['IblockId'],$currentValues);
+		      	//echo "<pre>cur".print_r($currentActivity['Properties']['IblockFields'],true)."</pre>";     	
+
 			}
 		}
 		else
 		{
 			$renderEntityFields = self::renderEntityFields($currentValues['IblockId'], $currentValues);
 		}
+
 		
 
 		$runtime = CBPRuntime::GetRuntime();
@@ -146,6 +143,7 @@ class CBPIbGetDataActivity extends CBPActivity
 	{
 		$errors = [];
 
+
 		$properties = ['DocumentType' => $documentType];
 		$iblockFields = self::getIblockFields($currentValues['IblockId']);
 		$properties['IblockId'] = $currentValues['IblockId'];
@@ -155,52 +153,70 @@ class CBPIbGetDataActivity extends CBPActivity
 		foreach ($iblockFields as $fieldId => $fieldValue)
 		{
 			$properties['IblockFields'][$fieldId] = $currentValues['IblockFields'][$fieldId];			
-		}		
-
-
-		$arFieldsProps = self::QueryGetArrayFieldsProperties(["IBLOCK_ID"=>$currentValues['IblockId']], $currentValues['IblockFields']);			
-
-		$result_fields = [];
-
-		foreach($arFieldsProps['fields'] as $key => $value){
-			if(is_array($value['VALUE']))
-			{
-				$result_fields[$key]['Name'] = $key;
-				$result_fields[$key]['Type'] = 'string';
-			}
-			else
-			{
-				$result_fields[$key]['Name'] = $key;
-				$result_fields[$key]['Type'] = 'string';
-			}
-		}
-		
-		foreach($arFieldsProps['properties'] as $key => $value){
-			if(is_array($value['VALUE'])){
-				$result_fields['PROPERTY_'.$key]['Name'] = $key;
-				$result_fields['PROPERTY_'.$key]['Type'] = 'string';
-			}
-			else
-			{
-				$result_fields['PROPERTY_'.$key]['Name'] = $key;
-				$result_fields['PROPERTY_'.$key]['Type'] = 'string';
-			}
 		}
 
-		if($result_fields)
-		{
-			$result_fields['MESSAGE']['Name'] = GetMessage('IB_ACTIVITY_GET_DATA_IS_ELEMENT_MESSAGE_YES');
-			$result_fields['MESSAGE']['Type'] = 'string';
-		}
-		else
-		{
-			$result_fields['MESSAGE']['Name'] = GetMessage('IB_ACTIVITY_GET_DATA_IS_ELEMENT_MESSAGE_NO');
-			$result_fields['MESSAGE']['Type'] = 'string';
-		}
+		if (CModule::IncludeModule("iblock"))
+        {   
 
-		$properties['IblockFieldsResult'] = $result_fields;
+			$arSelect = Array("ID", "IBLOCK_ID", "NAME", "DATE_ACTIVE_FROM","PROPERTY_*");
+
+			define("LOG_FILENAME", $_SERVER["DOCUMENT_ROOT"]."/log.txt");
 			
-		
+
+			$arFilter = array_merge(array("IBLOCK_ID"=>$currentValues['IblockId']), $currentValues['IblockFields']);
+			
+			$res = CIBlockElement::GetList(Array(), $arFilter, false, Array(), $arSelect);
+			$result_fields = [];
+			if($ob = $res->GetNextElement(true, false)){ 
+			 	$arFields = $ob->GetFields(); 
+			 	$arProps = $ob->GetProperties(); 
+			 	$IblockElementId = $arFields['ID'];	
+			}
+
+			foreach($arFields as $key => $value){
+				if(is_array($value['VALUE']))
+				{
+					$result_fields[$key]['Name'] = $key;
+					$result_fields[$key]['Type'] = 'string';
+				}
+				else
+				{
+					$result_fields[$key]['Name'] = $key;
+					$result_fields[$key]['Type'] = 'string';
+				}
+			}
+			
+			foreach($arProps as $key => $value){
+				if(is_array($value['VALUE'])){
+					$result_fields['PROPERTY_'.$key]['Name'] = $key;
+					$result_fields['PROPERTY_'.$key]['Type'] = 'string';
+				}
+				else
+				{
+					$result_fields['PROPERTY_'.$key]['Name'] = $key;
+					$result_fields['PROPERTY_'.$key]['Type'] = 'string';
+				}
+			}
+
+			if($result_fields)
+			{
+				$result_fields['MESSAGE']['Name'] = GetMessage('IB_ACTIVITY_GET_DATA_IS_ELEMENT_MESSAGE_YES');
+				$result_fields['MESSAGE']['Type'] = 'string';
+			}
+			else
+			{
+				$result_fields['MESSAGE']['Name'] = GetMessage('IB_ACTIVITY_GET_DATA_IS_ELEMENT_MESSAGE_NO');
+				$result_fields['MESSAGE']['Type'] = 'string';
+			}
+
+			$properties['IblockFieldsResult'] = $result_fields;
+			
+			//$this->IblockFieldsResult = $result_fields;
+
+			//$this->SetPropertiesTypes($this->IblockFieldsResult);
+
+			//AddMessage2Log("Результат: " . json_encode($this->IblockFieldsResult), "iblock");
+		}
 
 		if (!empty($errors))
 			return false;
